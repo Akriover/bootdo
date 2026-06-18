@@ -1,3 +1,10 @@
+# bootdo (← 现在跑 user-crud-demo, vibe coding 实战 #1)
+
+> 原 bootdo 仓是 6 年前的空仓, 6/18 推上来做 Spring Boot vibe coding demo。
+> 保留 bootdo 名字因为它本身就是 Spring Boot demo 仓的意思, 巧合。
+
+---
+
 # User CRUD Demo (Spring Boot 3.5 + JPA + H2)
 
 > 简易用户信息录入系统, 单表 CRUD, Java 17
