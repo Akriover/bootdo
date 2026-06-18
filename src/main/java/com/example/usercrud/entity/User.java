@@ -1,50 +1,54 @@
 package com.example.usercrud.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+
 import java.time.Instant;
 
 /**
  * 用户实体 — 录入系统的核心表
  *
- * 设计:
- * - id 自增主键
- * - username 唯一 + 非空 + 长度 2-20
- * - email 唯一 + 合法格式
- * - phone 可选, 长度 ≤ 20
- * - createdAt/updatedAt 自动维护
+ * Swagger Schema 示例: <a href="http://localhost:8080/swagger-ui.html">Swagger UI</a>
  */
 @Entity
 @Table(name = "users", uniqueConstraints = {
         @UniqueConstraint(name = "uk_users_username", columnNames = "username"),
         @UniqueConstraint(name = "uk_users_email", columnNames = "email")
 })
+@Schema(description = "用户实体 — 录入系统的核心表")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "主键 ID, 自增", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
     private Long id;
 
     @NotBlank
     @Size(min = 2, max = 20)
     @Column(nullable = false, length = 20)
+    @Schema(description = "用户名, 唯一, 2-20 字符", example = "alice", requiredMode = Schema.RequiredMode.REQUIRED)
     private String username;
 
     @NotBlank
     @Email
     @Column(nullable = false, length = 100)
+    @Schema(description = "邮箱, 唯一, 合法 email 格式", example = "alice@example.com", requiredMode = Schema.RequiredMode.REQUIRED)
     private String email;
 
     @Size(max = 20)
     @Column(length = 20)
+    @Schema(description = "手机号, 可选, ≤ 20 字符", example = "13800000001", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String phone;
 
     @Column(name = "created_at", nullable = false, updatable = false)
+    @Schema(description = "创建时间, 自动维护", example = "2026-06-18T05:30:00Z", accessMode = Schema.AccessMode.READ_ONLY)
     private Instant createdAt;
 
     @Column(name = "updated_at", nullable = false)
+    @Schema(description = "更新时间, 自动维护", example = "2026-06-18T05:30:00Z", accessMode = Schema.AccessMode.READ_ONLY)
     private Instant updatedAt;
 
     @PrePersist
