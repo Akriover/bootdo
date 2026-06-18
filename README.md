@@ -127,3 +127,10 @@ src/main/java/com/example/usercrud/
 - JPA + Hibernate 6.x
 - springdoc-openapi 2.8.6
 - H2 2.x (dev) / MySQL 8.x (prod)
+
+## 已知坑 & 修法
+
+### 1. MySQL 启动: `Unknown table 'SEQUENCES' in information_schema`
+**根因**: Hibernate 6.6 默认 `SequenceInformationExtractorLegacyImpl` 查 `information_schema.SEQUENCES`, MySQL 8 没这张表, 启动 500
+**修法**: `application-prod.properties` 加 `spring.jpa.properties.hibernate.boot.allow_jdbc_metadata_access=false` (已在 6/18 修)
+**参考**: <https://github.com/spring-projects/spring-boot/issues/37973>

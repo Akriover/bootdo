@@ -10,6 +10,20 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: userdb
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u root -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -21,10 +35,29 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build with Maven
-        run: mvn -B clean verify -DskipTests=false
+      - name: Build with default H2 profile
+        run: mvn -B clean compile
 
-      - name: Test (H2 dev profile)
+      - name: Run unit tests on H2 dev profile
         run: mvn -B test
         env:
           SPRING_PROFILES_ACTIVE: dev
+
+      - name: Smoke test MySQL prod profile startup
+        run: |
+          timeout 30 mvn -B spring-boot:run \
+            -Dspring-boot.run.profiles=prod \
+            -Dspring-boot.run.jvmArguments="-Dspring.jpa.hibernate.ddl-auto=create-drop" \
+            2>&1 | tee /tmp/boot.log
+          if grep -q "Started UserCrudApplication" /tmp/boot.log; then
+            echo "OK MySQL prod profile started successfully"
+            exit 0
+          else
+            echo "FAIL startup failed, see /tmp/boot.log"
+            exit 1
+          fi
+        env:
+          SPRING_PROFILES_ACTIVE: prod
+          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/userdb?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8mb4&allowPublicKeyRetrieval=true
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: root
